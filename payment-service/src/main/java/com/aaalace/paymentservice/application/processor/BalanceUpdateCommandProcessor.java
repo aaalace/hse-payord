@@ -6,7 +6,6 @@ import com.aaalace.paymentservice.domain.model.BalanceUpdateCommand;
 import com.aaalace.paymentservice.domain.model.CommandState;
 import com.aaalace.paymentservice.domain.model.BalanceUpdateStatus;
 import com.aaalace.paymentservice.infrastructure.repository.BalanceUpdateCommandRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -36,7 +35,6 @@ public class BalanceUpdateCommandProcessor {
         }
     }
 
-    @Transactional
     protected void process(BalanceUpdateCommand command) {
         try {
             BalanceUpdateStatus status = balanceService.update(command.getUserId(), command.getAmount());
