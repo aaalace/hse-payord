@@ -1,5 +1,6 @@
 package com.aaalace.orderservice.infrastructure.broker.consumer;
 
+import com.aaalace.orderservice.application.service.OrderService;
 import com.aaalace.orderservice.domain.config.RabbitConfig;
 import com.aaalace.orderservice.domain.dto.PaymentStatusMessage;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +13,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PaymentStatusConsumer {
 
+    private final OrderService orderService;
+
     @RabbitListener(queues = RabbitConfig.PAYMENT_STATUS_KEY)
     public void receivePayment(PaymentStatusMessage message) {
-        System.out.println("Received payment status: " + message);
-        // todo: call PaymentStatusService.handlePaymentStatusUpdate
+        log.info("Received payment status: {}", message);
+        orderService.processOrderAfterPayment(message);
     }
 }

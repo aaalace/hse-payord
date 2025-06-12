@@ -1,7 +1,10 @@
 package com.aaalace.orderservice.domain.dto;
 
-import com.aaalace.orderservice.domain.model.BalanceUpdateStatus;
+import lombok.Builder;
+import lombok.Data;
 
+@Builder
+@Data
 public class OrderStatusDTO {
 
     private String orderId;

@@ -1,4 +1,4 @@
-package com.aaalace.orderservice.domain.model;
+package com.aaalace.orderservice.domain.dto;
 
 public enum BalanceUpdateStatus {
     FAILED,

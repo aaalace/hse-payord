@@ -1,5 +1,6 @@
 package com.aaalace.orderservice.presentation.socket.order;
 
+import com.aaalace.orderservice.domain.dto.OrderStatusDTO;
 import com.aaalace.orderservice.infrastructure.in_memory.UserSessionStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,22 +15,21 @@ public class OrderSocketProducer {
 
     private final UserSessionStorage sessionStorage;
 
-    public void sendToUser(String userId, String payload) {
+    public void sendToUser(String userId, OrderStatusDTO dto) {
         WebSocketSession session = sessionStorage.get(userId);
 
         if (session == null) {
             log.warn("No WebSocket session for userId: {}", userId);
             return;
         }
-
         if (!session.isOpen()) {
             log.warn("WebSocket session is closed for userId: {}", userId);
             return;
         }
 
         try {
-            session.sendMessage(new TextMessage(payload));
-            log.info("Sent message to {}: {}", userId, payload);
+            session.sendMessage(new TextMessage(dto.toString()));
+            log.info("Sent message to {}: {}", userId, dto);
         } catch (Exception e) {
             log.error("Failed to send message to userId: {}", userId, e);
         }
