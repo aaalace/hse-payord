@@ -13,4 +13,6 @@ public interface PaymentStatusCommandRepository extends JpaRepository<PaymentSta
     Optional<PaymentStatusCommand> findByBalanceUpdateCommandId(UUID id);
 
     List<PaymentStatusCommand> findTop50ByStateOrderByIdAsc(CommandState state);
+
+    boolean existsByOrderIdAndUserId(String orderId, String userId);
 }
