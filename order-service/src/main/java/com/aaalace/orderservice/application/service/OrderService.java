@@ -1,9 +1,7 @@
 package com.aaalace.orderservice.application.service;
 
-import com.aaalace.orderservice.domain.dto.BalanceUpdateStatus;
-import com.aaalace.orderservice.domain.dto.OrderRequestDTO;
-import com.aaalace.orderservice.domain.dto.OrderStatusDTO;
-import com.aaalace.orderservice.domain.dto.PaymentStatusMessage;
+import com.aaalace.orderservice.application.mapper.OrderMapper;
+import com.aaalace.orderservice.domain.dto.*;
 import com.aaalace.orderservice.domain.exception.BadRequestError;
 import com.aaalace.orderservice.domain.model.Order;
 import com.aaalace.orderservice.domain.model.OrderStatus;
@@ -17,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,8 +26,22 @@ public class OrderService {
     private final PaymentRequestCommandRepository commandRepository;
     private final OrderSocketProducer orderSocketProducer;
 
+    public List<OrderDTO> getUserOrders(@NonNull String userId) {
+        List<Order> orders =  orderRepository.findByUserId(userId);
+        return OrderMapper.toOrderDTOList(orders);
+    }
+
+    public OrderStatusDTO getOrderStatus(@NonNull String orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            log.error("Order with id {} not found", orderId);
+            throw new BadRequestError("Order not found");
+        }
+        return OrderMapper.toOrderStatusDTO(order);
+    }
+
     @Transactional
-    public void newOrder(@NonNull OrderRequestDTO request) {
+    public Order newOrder(@NonNull OrderRequestDTO request) {
         Order newOrder = Order.builder()
                 .userId(request.getUserId())
                 .amount(request.getPrice())
@@ -42,6 +56,8 @@ public class OrderService {
                 .build();
         commandRepository.save(command);
         log.info("New PaymentRequestCommand created: {}", newOrder);
+
+        return newOrder;
     }
 
     public void processOrderAfterPayment(PaymentStatusMessage message) {
@@ -58,10 +74,7 @@ public class OrderService {
         }
         orderRepository.save(order);
 
-        OrderStatusDTO statusDTO = OrderStatusDTO.builder()
-                .orderId(order.getId())
-                .status(message.getStatus())
-                .build();
-        orderSocketProducer.sendToUser(order.getUserId(), statusDTO);
+        OrderDTO orderDTO = OrderMapper.toOrderDTO(order);
+        orderSocketProducer.sendToUser(order.getUserId(), orderDTO);
     }
 }

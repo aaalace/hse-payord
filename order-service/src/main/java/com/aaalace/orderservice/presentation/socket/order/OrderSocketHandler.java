@@ -1,7 +1,11 @@
 package com.aaalace.orderservice.presentation.socket.order;
 
+import com.aaalace.orderservice.application.mapper.OrderMapper;
 import com.aaalace.orderservice.application.service.OrderService;
+import com.aaalace.orderservice.domain.dto.OrderDTO;
 import com.aaalace.orderservice.domain.dto.OrderRequestDTO;
+import com.aaalace.orderservice.domain.dto.OrderStatusDTO;
+import com.aaalace.orderservice.domain.model.Order;
 import com.aaalace.orderservice.infrastructure.in_memory.UserSessionStorage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +25,7 @@ public class OrderSocketHandler extends TextWebSocketHandler {
 
     private final UserSessionStorage storage;
     private final OrderService orderService;
+    private final OrderSocketProducer orderSocketProducer;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -37,7 +42,9 @@ public class OrderSocketHandler extends TextWebSocketHandler {
 
         OrderRequestDTO orderRequest = objectMapper.readValue(message.getPayload(), OrderRequestDTO.class);
         try {
-            orderService.newOrder(orderRequest);
+            Order order = orderService.newOrder(orderRequest);
+            OrderDTO dto = OrderMapper.toOrderDTO(order);
+            orderSocketProducer.sendToUser(userId, dto);
         } catch (Exception e) {
             log.error("Can not handle WS message for OrderRequestDTO: {}", e.getMessage());
         }

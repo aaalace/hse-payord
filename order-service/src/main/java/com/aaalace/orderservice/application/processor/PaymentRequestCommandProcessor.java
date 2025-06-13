@@ -25,6 +25,7 @@ public class PaymentRequestCommandProcessor {
         List<PaymentRequestCommand> commands = paymentRequestCommandRepository.findTop50ByStateOrderByIdAsc(
                 CommandState.PENDING
         );
+        if (commands.isEmpty()) return;
 
         PaymentRequestCommandProcessor self = context.getBean(PaymentRequestCommandProcessor.class);
         log.info("Start to process {} PaymentRequestCommand commands", commands.size());

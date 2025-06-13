@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+
+  # ------ hse-payord client: Web Client ------
+
+  web-client:
+    build:
+      context: ../web-client
+      dockerfile: Dockerfile
+    container_name: web-client
+    ports:
+      - "3000:8080"
+    depends_on:
+      - traefik
+
+  # ------ hse-payord services: API Gateway + Payment Service + Order Service ------
+
+  traefik:
+    image: traefik:v3.4
+    container_name: traefik
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../api-gateway/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ../api-gateway/dynamic:/etc/traefik/dynamic:ro
+    restart: unless-stopped
+    networks:
+      - network
+    depends_on:
+      - payment-service
+      - order-service
+
+  payment-service:
+    build:
+      context: ../payment-service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    ports:
+      - "8091:8091"
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - network
+
+  order-service:
+    build:
+      context: ../order-service
+      dockerfile: Dockerfile
+    container_name: order-service
+    ports:
+      - "8092:8092"
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - network
+
+  # ------ hse-payord infrastructure: RabbitMQ + Postgres ------
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - payord_postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - network
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: secret
+    volumes:
+      - payord_rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - network
+
+volumes:
+  payord_postgres_data:
+  payord_rabbitmq_data:
+
+networks:
+  network:

@@ -1,0 +1,59 @@
+http:
+  routers:
+    dashboard:
+      rule: "PathPrefix(`/dashboard`)"
+      service: "api@internal"
+
+    payment-api:
+      rule: "PathPrefix(`/payment`)"
+      service: "payment-service"
+      middlewares:
+        - strip-payment-prefix
+        - cors-headers
+
+    order-api:
+      rule: "PathPrefix(`/order`)"
+      service: "order-service"
+      middlewares:
+        - strip-order-prefix
+        - cors-headers
+
+  services:
+    payment-service:
+      loadBalancer:
+        servers:
+          - url: "http://payment-service:8091"
+
+    order-service:
+      loadBalancer:
+        servers:
+          - url: "http://order-service:8092"
+
+
+  middlewares:
+    strip-payment-prefix:
+      stripPrefix:
+        prefixes:
+          - "/payment"
+    strip-order-prefix:
+      stripPrefix:
+        prefixes:
+          - "/order"
+    cors-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        accessControlAllowOriginList:
+          - "*"
+        accessControlAllowHeaders:
+          - "Origin"
+          - "Content-Type"
+          - "Accept"
+          - "Authorization"
+        accessControlMaxAge: 100
+        addVaryHeader: true
+

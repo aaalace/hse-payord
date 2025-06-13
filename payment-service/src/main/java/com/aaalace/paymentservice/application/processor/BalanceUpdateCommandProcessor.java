@@ -27,6 +27,7 @@ public class BalanceUpdateCommandProcessor {
         List<BalanceUpdateCommand> commands = balanceUpdateCommandRepository.findTop50ByStateOrderByIdAsc(
                 CommandState.PENDING
         );
+        if (commands.isEmpty()) return;
 
         BalanceUpdateCommandProcessor self = context.getBean(BalanceUpdateCommandProcessor.class);
         log.info("Start to process {} BalanceUpdateCommand commands", commands.size());
