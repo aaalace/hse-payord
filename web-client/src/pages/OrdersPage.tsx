@@ -22,7 +22,9 @@ const OrdersPage = () => {
     const userId = localStorage.getItem("userId");
 
     useEffect(() => {
-        if (!userId) return;
+        if (!userId) {
+            return;
+        }
 
         connectWebSocket(
             userId,

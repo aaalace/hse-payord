@@ -93,12 +93,13 @@ public class BalanceService {
                 return BalanceUpdateStatus.BALANCE_NOT_EXISTS;
             }
 
-            if (prevBalance.getBalance().add(amount).compareTo(BigDecimal.ZERO) < 0) {
+            BigDecimal newBalance = prevBalance.getBalance().add(amount);
+            if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
                 log.warn("Insufficient funds, userId={}", userId);
                 return BalanceUpdateStatus.INSUFFICIENT_FUNDS;
             }
 
-            balanceRepository.addAmountByUserId(userId, amount);
+            balanceRepository.addAmountByUserId(userId, newBalance, prevBalance.getBalance());
             log.info("Balance updated for userId={}", userId);
 
             return BalanceUpdateStatus.SUCCESS;

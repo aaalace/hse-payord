@@ -27,7 +27,7 @@ public class OrderService {
     private final OrderSocketProducer orderSocketProducer;
 
     public List<OrderDTO> getUserOrders(@NonNull String userId) {
-        List<Order> orders =  orderRepository.findByUserId(userId);
+        List<Order> orders = orderRepository.findByUserId(userId);
         return OrderMapper.toOrderDTOList(orders);
     }
 

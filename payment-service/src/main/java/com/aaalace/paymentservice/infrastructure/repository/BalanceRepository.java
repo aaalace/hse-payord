@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -16,6 +17,6 @@ public interface BalanceRepository extends JpaRepository<Balance, UUID> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE Balance b SET b.balance = b.balance + :amount WHERE b.userId = :userId")
-    void addAmountByUserId(String userId, BigDecimal amount);
+    @Query("UPDATE Balance b SET b.balance = :newBalance WHERE b.userId = :userId AND b.balance = :expectedBalance")
+    void addAmountByUserId(String userId, BigDecimal newBalance, BigDecimal expectedBalance);
 }

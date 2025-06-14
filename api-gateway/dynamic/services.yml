@@ -22,13 +22,12 @@ http:
     payment-service:
       loadBalancer:
         servers:
-          - url: "http://payment-service:8091"
+          - url: "http://payment-service:8080"
 
     order-service:
       loadBalancer:
         servers:
-          - url: "http://order-service:8092"
-
+          - url: "http://order-service:8080"
 
   middlewares:
     strip-payment-prefix:
