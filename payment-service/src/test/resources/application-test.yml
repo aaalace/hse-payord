@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/payment
+    username: admin
+    password: secret
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: secret
